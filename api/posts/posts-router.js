@@ -68,23 +68,31 @@ router.post('/api/posts', (req, res) => {
 
 router.put('/api/posts/:id', (req, res) => {
     const id = req.params.id;
-    const post = db.findById(id);
+    const title = req.body.title;
+    const contents = req.body.contents;
 
-    if(!req.body.title) {
+    if(!title || !contents) {
         res.status(400).json({
             message: 'Post cannot be empty.'
         })
     }
-    if(post){
-        const updatedPost = db.update(id, {
-            post: req.body.post
+
+    db.update(id, req.body)
+        .then((post) => {
+            if(post) {
+                res.status(200).json(post)
+            } else {
+                res.status(404).json({
+                    message: `Sorry, that post doesn't exist.`
+                })
+            }
         })
-        res.status(400).json(updatedPost);
-    } else {
-        res.status(400).json({
-            message: 'Post not found'
+        .catch((err) => {
+            console.log(err)
+            res.status(500).json({
+                message: `The post information could not be retrieved.`
+            })
         })
-    }
 
 })
 
